@@ -1,6 +1,4 @@
 #cleanup
-
-
 import xlrd
 import pandas as pd
 import re
@@ -10,29 +8,44 @@ import numpy as np
 #Excel data file name
 data_file_name = '06222016 Staph Array Data.xlsx'
 
-# sheets = pd.read_excel(data_file_name, sheetname=None, skiprows=0, header=1, na_values='NaN')
-# for sh_name, df in sheets.items():
-#     print(sh_name)
-#
-# df = sheets['Plate 1']
-
-
+#Function to parse Sample ID into 3 columns: PID, Visit and Dilution
 def parse_sid(sample_id):
-    words = re.split('\s+', sample_id.strip())
-    dilution = None
-    visit = None
+    words = re.split('\s+', sample_id.strip()) #Get all the words in the Sample ID string
+    dilution = None #Initialize Dilution as None
+    visit = None #Initialize Visit as None
+
+    #Add the first word in the Sample ID string into PID\
+    #This is to ensure the first word always be parsed as PID, \
+    #even when it matches the pattern of visit or dilution
     pid = words.pop(0)
 
+    #Loop through the rest of words to get Visit and Dilution info
     if len(words) > 0:
         for w in words:
-            if re.match('V\d', w) and visit is None:
-                visit = w
-            elif re.match('[1-9]0+',w) and dilution is None:
+            if re.match('V\d', w) and visit is None: #First check if match 'V\d'\
+                #If visit is already assigned, skip
+                visit = w #If yes, assign the word as Visit
+            elif re.match('[1-9]0+',w) and dilution is None: #If not match Visit pattern,\
+                #  match it to Dilution pattern of mutiple '0's after a digit
                 dilution = w
             else:
-                pid = pid + ' ' +w
+                pid = pid + ' ' +w #If the word not matching Visit or Dilution, add it to PID
 
-    return([pid, visit, dilution])
+    return([pid, visit, dilution]) #Return the parsed 3 variables as list
 
-sample_id = "100000  vessfdf 10   "
-print(parse_sid(sample_id))
+
+sheets = pd.read_excel(data_file_name, sheetname=None, skiprows=0, header=1, na_values='NaN')
+# for sh_name, df in sheets.items():
+#     print(sh_name)
+
+df = sheets['Plate 1']
+#Map the function parse_sid to the column 'Sample ID' and \
+#zip it into 3 new columns: PID, Visit and Dilution
+df['PID'], df['Visit'], df['Dilution'] = zip(*df['Sample ID'].map(parse_sid))
+
+#Re-arrange the columns that PID, Visit and Dilution are the first 3 columns
+#The original Sample ID column is removed
+cols = list(df.keys()) #Get all column names as list
+cols = cols[-3:] + cols[1:-3] #Re-arrange column names that it start with PID, Visit and Dilution, cols[0] dropped
+
+df = df[cols] #
