@@ -1,12 +1,11 @@
-#cleanup
-import xlrd
 import pandas as pd
 import re
 import numpy as np
-# import itertools
+
 
 #Excel data file name
 data_file_name = '06222016 Staph Array Data.xlsx'
+
 
 #Function to parse Sample ID into 3 columns: PID, Visit and Dilution
 def parse_sid(sample_id):
@@ -38,7 +37,11 @@ sheets = pd.read_excel(data_file_name, sheetname=None, skiprows=0, header=1, na_
 # for sh_name, df in sheets.items():
 #     print(sh_name)
 
+for sheet_name in sheets.keys():
+    print(sheet_name)
+
 df = sheets['Plate 1']
+sheet_name = 'Plate 1'
 
 #Remove white space and new line at the start and end of column names
 df.columns = df.columns.str.strip()
@@ -65,5 +68,9 @@ patient_info = df[['Hospital', 'Age', 'Gender']]
 
 #Fill empty cells with previous row
 df.loc[:, ['Hospital', 'Age', 'Gender']] = patient_info.fillna(method='ffill')
+
+#Output formated dataframe to text file
+out_file_name = sheet_name + '.txt'
+df.to_csv(out_file_name,sep='\t', na_rep=np.nan, index=False)
 
 #Draw plots codes below
