@@ -85,4 +85,13 @@ for sheet_name, df in sheets.items():
 
     col = cols_to_plot[0]
 
+    pid_groups = df.groupby('PID')
 
+    pid = '33142'
+    pid_data = pid_groups.get_group(pid)
+    gender = list(pid_data['Gender'])[0]
+    age = int(list(pid_data['Age'])[0])
+    hospital = list(pid_data['Hospital'])[0]
+
+
+    plot_title = '{}({} {} yr {}) {}'.format(pid, gender, age, hospital, col)
