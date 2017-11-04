@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 import numpy as np
-import matplotlib
+import matplotlib.pyplot as plt
 
 # Excel data file name
 data_file_name = '06222016 Staph Array Data.xlsx'
@@ -95,3 +95,9 @@ for sheet_name, df in sheets.items():
 
 
     plot_title = '{}({} {} yr {}) {}'.format(pid, gender, age, hospital, col)
+
+    # pid_data.groupby('Visit')[['Dilution','surface protein ext']].plot(marker='o', linestyle='-')
+    pid_data.set_index('Dilution', inplace=True)
+    pid_data.groupby('Visit')['surface protein ext'].plot(legend=True, marker='o', markerfacecolor='white')
+    # pd.factorize(pid_data.Dilution)
+    plt.plot(pid_data.groupby('Visit')['surface protein ext'])
